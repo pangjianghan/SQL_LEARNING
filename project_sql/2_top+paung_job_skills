@@ -1,0 +1,54 @@
+WITH high_paying_analyst_jobs AS (
+SELECT
+    job_postings_fact.job_id,
+    job_title,
+    name AS company_name,
+    job_location,
+    job_schedule_type,
+    salary_year_avg,
+    job_posted_date
+FROM
+    job_postings_fact
+LEFT JOIN company_dim
+    ON job_postings_fact.company_id =company_dim.company_id
+-- Because want to ignore the job without skills_id
+WHERE
+-- Can change to the job title that interested
+    job_title_short = 'Data Analyst'
+    AND
+    job_location = 'Anywhere'
+    AND
+    salary_year_avg is NOT NULL
+ORDER BY
+    salary_year_avg DESC
+LIMIT 10
+)
+-- Initially I joined the skills here first --> causing only return 10 cols for overall data with jobs
+-- Wrong output given
+
+
+-- After getting top 10 high pay analyst job --> merge to the skills
+SELECT
+    high_paying_analyst_jobs.*,
+    skills
+FROM high_paying_analyst_jobs
+INNER JOIN skills_job_dim
+    ON high_paying_analyst_jobs.job_id = skills_job_dim.job_id
+-- INNER or LEFT Join will have same output as the skills_id already established
+INNER JOIN skills_dim
+ON skills_dim.skill_id = skills_job_dim.skill_id
+ORDER BY
+    salary_year_avg DESC
+
+/*
+Short Conclusions:
+SQL and Python are the top 2 most required skills, dominating the analyst job postings.
+
+Excel, Tableau, and Power BI remain highly relevant, showing demand for business intelligence and reporting tools.
+
+The top 6 skills account for approximately 80% of all skill mentions, aligning with the Pareto principle.
+
+Cloud and big data tools like Azure, Databricks, Snowflake, and AWS are emerging as key differentiators in high-paying roles.
+
+Focusing on mastering the top 5–6 skills can maximize your chances of qualifying for top analyst positions.
+*/
